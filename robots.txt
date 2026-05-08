@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://macadapaleta.com.br/sitemap.xml
+Sitemap: https://russodrl.github.io/macadapaleta/sitemap.xml
 
 # Maçã da Paleta - Churrascaria e Empório
 # Piracicaba, SP - Brasil
