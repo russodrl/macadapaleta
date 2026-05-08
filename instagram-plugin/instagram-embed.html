@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Feed – @macadapaleta Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #fafafa;
+      color: #262626;
+      padding: 20px;
+    }
+    .demo-header {
+      text-align: center;
+      padding: 30px 20px;
+      margin-bottom: 30px;
+    }
+    .demo-header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .demo-header p { color: #8e8e8e; font-size: 14px; }
+    .demo-section {
+      max-width: 900px;
+      margin: 0 auto 40px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .demo-section h2 { font-size: 18px; margin-bottom: 16px; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .controls label { font-size: 13px; color: #555; display: flex; align-items: center; gap: 4px; }
+    .controls input[type="text"],
+    .controls input[type="number"],
+    .controls select {
+      padding: 6px 10px;
+      border: 1px solid #dbdbdb;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .controls input[type="text"] { width: 220px; }
+    .controls input[type="number"] { width: 70px; }
+    .controls button {
+      padding: 8px 20px;
+      background: #833ab4;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .controls button:hover { background: #6a2d91; }
+    .controls button.secondary { background: #dbdbdb; color: #262626; }
+    .controls button.secondary:hover { background: #c7c7c7; }
+
+    #feed-container { min-height: 200px; }
+
+    .status-bar {
+      font-size: 12px;
+      color: #8e8e8e;
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: #fafafa;
+      border-radius: 6px;
+      display: none;
+    }
+    .status-bar.visible { display: block; }
+    .status-bar.error { color: #e74c3c; background: #fdf0ef; }
+    .status-bar.success { color: #27ae60; background: #eafaf1; }
+
+    .data-attr-section {
+      background: #f8f8f8;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .data-attr-section code {
+      background: #e8e8e8;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo-header">
+    <h1>📸 Instagram Feed Demo</h1>
+    <p>@macadapaleta – powered by Cloudflare Worker proxy</p>
+  </div>
+
+  <!-- Interactive Demo -->
+  <div class="demo-section">
+    <h2>Interactive Demo</h2>
+    <div class="controls">
+      <label>Worker URL:
+        <input type="text" id="worker-url" placeholder="https://your-worker.workers.dev" value="">
+      </label>
+      <label>Username:
+        <input type="text" id="ig-username" value="macadapaleta">
+      </label>
+      <label>Posts:
+        <input type="number" id="ig-count" value="6" min="1" max="24">
+      </label>
+      <label>Columns:
+        <select id="ig-columns">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+        </select>
+      </label>
+      <button id="load-btn">Load Feed</button>
+      <button id="refresh-btn" class="secondary">Refresh</button>
+    </div>
+    <div id="feed-container"></div>
+    <div id="status-bar" class="status-bar"></div>
+  </div>
+
+  <!-- Data-attribute auto-init example -->
+  <div class="demo-section">
+    <h2>Auto-init Example (data attributes)</h2>
+    <p style="font-size:13px;color:#8e8e8e;margin-bottom:12px">
+      This section demonstrates declarative init via
+      <code>data-instagram-feed</code> attributes. Set the worker URL above and
+      the widget will auto-initialize.
+    </p>
+    <div
+      data-instagram-feed
+      data-ig-username="macadapaleta"
+      data-ig-count="6"
+      data-ig-columns="3"
+      data-ig-caption="true"
+    >
+      <em style="color:#999;font-size:13px">Feed will appear here when a valid worker URL is configured.</em>
+    </div>
+  </div>
+
+  <!-- Usage Reference -->
+  <div class="demo-section">
+    <h2>Quick Reference</h2>
+    <div class="data-attr-section">
+      <strong>JavaScript API:</strong><br>
+      <code>new InstagramFeed({ container: '#el', username: 'macadapaleta', workerUrl: '...', count: 9 }).load();</code>
+      <br><br>
+      <strong>Data-attribute API:</strong><br>
+      <code>&lt;div data-instagram-feed data-ig-username="macadapaleta" data-ig-worker="..." data-ig-count="9"&gt;</code>
+      <br><br>
+      <strong>Options:</strong>
+      <code>container</code>,
+      <code>username</code>,
+      <code>workerUrl</code>,
+      <code>count</code>,
+      <code>columns</code>,
+      <code>gap</code>,
+      <code>showCaption</code>,
+      <code>showStats</code>,
+      <code>lazyLoad</code>,
+      <code>onLoad</code>,
+      <code>onError</code>,
+      <code>onPostClick</code>
+    </div>
+  </div>
+
+  <!-- Load the plugin -->
+  <script src="instagram-feed.js"></script>
+  <script>
+    // Interactive demo logic
+    const feedContainer = document.getElementById('feed-container');
+    const statusBar = document.getElementById('status-bar');
+    let currentFeed = null;
+
+    function showStatus(msg, type) {
+      statusBar.textContent = msg;
+      statusBar.className = 'status-bar visible ' + (type || '');
+    }
+
+    function loadFeed() {
+      const workerUrl = document.getElementById('worker-url').value.trim();
+      if (!workerUrl) {
+        showStatus('⚠️ Please enter a Cloudflare Worker URL first.', 'error');
+        return;
+      }
+
+      const username = document.getElementById('ig-username').value.trim() || 'macadapaleta';
+      const count = parseInt(document.getElementById('ig-count').value, 10) || 6;
+      const columns = parseInt(document.getElementById('ig-columns').value, 10) || 3;
+
+      if (currentFeed) currentFeed.destroy();
+
+      currentFeed = new InstagramFeed({
+        container: feedContainer,
+        username: username,
+        workerUrl: workerUrl,
+        count: count,
+        columns: columns,
+        showCaption: true,
+        showStats: true,
+        onLoad: function (posts) {
+          showStatus(`✅ Loaded ${posts.length} posts for @${username}`, 'success');
+        },
+        onError: function (err) {
+          showStatus(`❌ Error: ${err.message}`, 'error');
+        },
+      });
+
+      showStatus('⏳ Loading posts…');
+      currentFeed.load();
+    }
+
+    document.getElementById('load-btn').addEventListener('click', loadFeed);
+    document.getElementById('refresh-btn').addEventListener('click', function () {
+      if (currentFeed) {
+        showStatus('⏳ Refreshing…');
+        currentFeed.refresh();
+      } else {
+        loadFeed();
+      }
+    });
+
+    // Update data-attribute demo worker URL when user changes it
+    document.getElementById('worker-url').addEventListener('change', function () {
+      const url = this.value.trim();
+      const autoInitEl = document.querySelector('[data-instagram-feed]');
+      if (autoInitEl && url) {
+        autoInitEl.setAttribute('data-ig-worker', url);
+      }
+    });
+  </script>
+
+</body>
+</html>

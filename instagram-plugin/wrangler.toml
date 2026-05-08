@@ -1,0 +1,8 @@
+name = "instagram-feed"
+main = "instagram-worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+INSTAGRAM_USERNAME = "macadapaleta"
+CACHE_TTL_SECONDS = "3600"
+ALLOWED_ORIGINS = "*"

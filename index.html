@@ -21,7 +21,7 @@
         "name": "Maça da Paleta - Steakhouse & Empório",
         "description": "A melhor Steakhouse de Piracicaba. Cortes nobres na brasa, empório de carnes, açougue próprio e chopp gelado.",
         "url": "https://russodrl.github.io/macadapaleta/",
-        "telephone": "+5519981458256",
+        "telephone": "+551****8256",
         "address": {
             "@type": "PostalAddress",
             "streetAddress": "Av. Jaime Pereira, 3865, Loja 01",
@@ -258,6 +258,24 @@
     </div>
 </section>
 
+
+<!-- INSTAGRAM FEED -->
+<section class="instagram-section" id="instagram">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="tag">Siga-nos</div>
+            <h2>No Instagram</h2>
+            <p>Acompanhe nossas novidades, promoções e bastidores pelo @macadapaleta</p>
+        </div>
+        <div id="instagram-feed" class="fade-in"></div>
+    </div>
+</section>
+
+<style>
+    .instagram-section { background: var(--bg-dark); }
+    #instagram-feed { max-width: 900px; margin: 0 auto; }
+</style>
+
 <!-- LOCALIZACAO -->
 <section class="localizacao" id="localizacao">
     <div class="container">
@@ -294,7 +312,7 @@
     <div class="footer-grid">
         <div class="footer-brand"><a href="#" class="nav-logo"><span>Maça</span> da Paleta</a><p>A melhor Steakhouse de Piracicaba. Cortes nobres na brasa, empório de carnes, açougue próprio e chopp gelado.</p></div>
         <div class="footer-col"><h4>Navegação</h4><a href="#sobre">Sobre Nós</a><a href="#diferenciais">Diferenciais</a><a href="#cardapio">Cardápio</a><a href="#promos">Promoções</a></div>
-        <div class="footer-col"><h4>Contato</h4><a href="https://wa.me/5519981458256">WhatsApp</a><a href="tel:+5519981458256">(19) 98145-8256</a><a href="https://www.instagram.com/macadapaleta/">Instagram</a><a href="https://www.facebook.com/p/Ma%C3%A7%C3%A3-da-Paleta-61578924741126/">Facebook</a></div>
+        <div class="footer-col"><h4>Contato</h4><a href="https://wa.me/5519981458256">WhatsApp</a><a href="tel:+551****8256">(19) 98145-8256</a><a href="https://www.instagram.com/macadapaleta/">Instagram</a><a href="https://www.facebook.com/p/Ma%C3%A7%C3%A3-da-Paleta-61578924741126/">Facebook</a></div>
         <div class="footer-col"><h4>Localização</h4><a href="https://www.google.com/maps/place/Ma%C3%A7%C3%A3+da+Paleta/@-22.7024316,-47.6786792,17z/" target="_blank">Av. Jaime Pereira, 3865<br>Jardim Parque Jupia<br>Piracicaba - SP</a></div>
     </div>
     <div class="footer-bottom"><p>&copy; 2026 Maça da Paleta - Steakhouse & Empório. Todos os direitos reservados. CNPJ: 61.256.890/0001-91</p></div>
@@ -313,5 +331,20 @@
     document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
     document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t){t.scrollIntoView({behavior:'smooth',block:'start'});document.getElementById('navLinks').classList.remove('active')}})});
 </script>
+
+<!-- Instagram Feed Plugin -->
+<script src="instagram-plugin/instagram-feed.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    new InstagramFeed({
+        container: '#instagram-feed',
+        username: 'macadapaleta',
+        count: 6,
+        columns: 3,
+        showCaption: true
+    }).load();
+});
+</script>
+
 </body>
 </html>
