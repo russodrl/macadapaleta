@@ -1,6 +1,6 @@
-name = "instagram-feed"
+name = "macadapaleta-instagram-feed"
 main = "instagram-worker.js"
-compatibility_date = "2024-01-01"
+compatibility_date = "2026-05-01"
 
 [vars]
 INSTAGRAM_USERNAME = "macadapaleta"

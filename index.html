@@ -345,9 +345,12 @@ document.addEventListener('DOMContentLoaded', function() {
     new InstagramFeed({
         container: '#instagram-feed',
         username: 'macadapaleta',
+        workerUrl: '',
+        fallbackJson: 'instagram-plugin/instagram-fallback.json',
         count: 6,
         columns: 3,
-        showCaption: true
+        showCaption: true,
+        showStats: false
     }).load();
 });
 </script>

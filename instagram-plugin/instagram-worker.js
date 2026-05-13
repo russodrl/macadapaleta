@@ -1,398 +1,222 @@
 /**
- * Instagram Feed - Cloudflare Worker (CORS Proxy & Cache)
+ * Instagram Feed Worker
+ * Cloudflare Worker para buscar as últimas postagens públicas do Instagram.
  *
- * Deploy: wrangler deploy
- * This worker fetches Instagram posts via multiple strategies and caches
- * responses in-memory (1 hour). It returns a normalized JSON array of posts.
- *
- * Environment variables (set via wrangler.toml or dashboard):
- *   INSTAGRAM_USERNAME - target username (default: macadapaleta)
- *   CACHE_TTL_SECONDS  - cache TTL in seconds (default: 3600)
- *   ALLOWED_ORIGINS    - comma-separated allowed origins (default: *)
+ * Secrets opcionais:
+ *   INSTAGRAM_SESSIONID, melhora a taxa de sucesso do web_profile_info.
+ * Vars opcionais:
+ *   INSTAGRAM_USERNAME, CACHE_TTL_SECONDS, ALLOWED_ORIGINS
  */
 
 const DEFAULT_USERNAME = 'macadapaleta';
-const DEFAULT_CACHE_TTL = 3600; // 1 hour
+const DEFAULT_CACHE_TTL = 3600;
+const FALLBACK_POSTS = [
+  { id: 'DXr7SYAjNDJ', shortcode: 'DXr7SYAjNDJ', permalink: 'https://www.instagram.com/reel/DXr7SYAjNDJ/', thumbnail_url: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=900&q=85&auto=format&fit=crop', caption: 'Terça é dia de chopp em dobro aqui no Maçã da Paleta.', timestamp: '', likes: 0, comments: 0, is_video: true },
+  { id: 'DXNWGTOjWx1', shortcode: 'DXNWGTOjWx1', permalink: 'https://www.instagram.com/reel/DXNWGTOjWx1/', thumbnail_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=900&q=85&auto=format&fit=crop', caption: 'Lugar ideal para compartilhar bons momentos com amigos e família.', timestamp: '', likes: 0, comments: 0, is_video: true },
+  { id: 'DXNWhk6jZZj', shortcode: 'DXNWhk6jZZj', permalink: 'https://www.instagram.com/reel/DXNWhk6jZZj/', thumbnail_url: 'https://images.unsplash.com/photo-1558030006-450675393462?w=900&q=85&auto=format&fit=crop', caption: 'Cortes que chegam à mesa e chamam atenção no primeiro olhar.', timestamp: '', likes: 0, comments: 0, is_video: true },
+  { id: 'DUoTSNPkr0U', shortcode: 'DUoTSNPkr0U', permalink: 'https://www.instagram.com/p/DUoTSNPkr0U/', thumbnail_url: 'https://images.unsplash.com/photo-1600891964092-4316c288032e?w=900&q=85&auto=format&fit=crop', caption: 'Cardápio novo, mais opções e mais sabor.', timestamp: '', likes: 0, comments: 0, is_video: false },
+  { id: 'DVWFAZIArb6', shortcode: 'DVWFAZIArb6', permalink: 'https://www.instagram.com/reel/DVWFAZIArb6/', thumbnail_url: 'https://images.unsplash.com/photo-1588168333986-5078d3ae3976?w=900&q=85&auto=format&fit=crop', caption: 'Cortes nobres no ponto perfeito para o seu paladar.', timestamp: '', likes: 0, comments: 0, is_video: true },
+  { id: 'DWHnqP7EVVD', shortcode: 'DWHnqP7EVVD', permalink: 'https://www.instagram.com/reel/DWHnqP7EVVD/', thumbnail_url: 'https://images.unsplash.com/photo-1615937722923-67f6deaf2cc9?w=900&q=85&auto=format&fit=crop', caption: 'A casa está aberta. Cortes nobres, no ponto perfeito.', timestamp: '', likes: 0, comments: 0, is_video: true }
+];
 
-// In-memory cache (persists per worker isolate, resets on cold start)
-const cache = new Map();
-
-/**
- * Main fetch handler
- */
 export default {
   async fetch(request, env, ctx) {
+    if (request.method === 'OPTIONS') return optionsResponse(request, env);
+    if (request.method !== 'GET') return jsonResponse({ success: false, error: 'Method not allowed' }, 405, request, env);
+
     const url = new URL(request.url);
-    const username = env.INSTAGRAM_USERNAME || url.searchParams.get('username') || DEFAULT_USERNAME;
-    const count = parseInt(url.searchParams.get('count') || '12', 10);
-    const cacheTTL = parseInt(env.CACHE_TTL_SECONDS || DEFAULT_CACHE_TTL, 10);
+    const username = sanitizeUsername(url.searchParams.get('username') || env.INSTAGRAM_USERNAME || DEFAULT_USERNAME);
+    const count = clamp(parseInt(url.searchParams.get('count') || '6', 10), 1, 24);
+    const ttl = clamp(parseInt(env.CACHE_TTL_SECONDS || DEFAULT_CACHE_TTL, 10), 300, 86400);
+    const cacheKey = new Request(`${url.origin}/cache/${username}/${count}`);
+    const cache = caches.default;
 
-    // Handle CORS preflight
-    if (request.method === 'OPTIONS') {
-      return handleOptions(request, env);
+    const cached = await cache.match(cacheKey);
+    if (cached) {
+      const data = await cached.json();
+      return jsonResponse({ ...data, cached: true }, 200, request, env);
     }
 
-    // Only allow GET
-    if (request.method !== 'GET') {
-      return jsonResponse({ error: 'Method not allowed' }, 405, request, env);
-    }
+    const attempts = [
+      ['web_profile_info', () => fetchViaWebProfile(username, count, env)],
+      ['profile_html', () => fetchViaProfileHtml(username, count)],
+      ['rss', () => fetchViaRss(username, count)],
+      ['fallback', async () => FALLBACK_POSTS.slice(0, count)]
+    ];
 
-    // Rate limiting: basic key = IP
-    const clientIP = request.headers.get('cf-connecting-ip') || 'unknown';
-    if (isRateLimited(clientIP)) {
-      return jsonResponse({ error: 'Rate limited. Try again later.' }, 429, request, env);
-    }
+    let posts = [];
+    let source = 'fallback';
+    let lastError = '';
 
-    // Check cache
-    const cacheKey = `ig:${username}:${count}`;
-    const cached = cache.get(cacheKey);
-    if (cached && (Date.now() - cached.timestamp) < cacheTTL * 1000) {
-      return jsonResponse({ posts: cached.data, cached: true, source: cached.source }, 200, request, env);
-    }
-
-    // Try strategies in order
-    let result = null;
-    let source = 'unknown';
-
-    // Strategy 1: Instagram GraphQL (i.instagram.com)
-    try {
-      result = await fetchViaGraphQL(username, count);
-      source = 'graphql';
-    } catch (e) {
-      console.log('GraphQL strategy failed:', e.message);
-    }
-
-    // Strategy 2: oEmbed approach (limited - only gets post URLs from profile page scrape)
-    if (!result || result.length === 0) {
+    for (const [name, fn] of attempts) {
       try {
-        result = await fetchViaOembed(username, count);
-        source = 'oembed';
-      } catch (e) {
-        console.log('oEmbed strategy failed:', e.message);
+        posts = await fn();
+        if (posts && posts.length) {
+          source = name;
+          break;
+        }
+      } catch (error) {
+        lastError = error.message || String(error);
       }
     }
 
-    // Strategy 3: RSS Bridge fallback
-    if (!result || result.length === 0) {
-      try {
-        result = await fetchViaRSSBridge(username, count);
-        source = 'rssbridge';
-      } catch (e) {
-        console.log('RSS Bridge strategy failed:', e.message);
-      }
-    }
-
-    // Strategy 4: Hardcoded fallback
-    if (!result || result.length === 0) {
-      result = getHardcodedPosts(username);
-      source = 'hardcoded';
-    }
-
-    // Cache the result
-    cache.set(cacheKey, { data: result, timestamp: Date.now(), source });
-
-    return jsonResponse({ posts: result, cached: false, source }, 200, request, env);
+    posts = normalizePosts(posts).slice(0, count);
+    const payload = { success: true, username, source, cached: false, updated_at: new Date().toISOString(), posts, last_error: lastError || undefined };
+    const responseForCache = jsonResponse(payload, 200, request, env, { 'Cache-Control': `public, max-age=${ttl}` });
+    ctx.waitUntil(cache.put(cacheKey, responseForCache.clone()));
+    return responseForCache;
   }
 };
 
-// ─── Strategy 1: Instagram GraphQL ─────────────────────────────────────────
+async function fetchViaWebProfile(username, count, env) {
+  const headers = {
+    'Accept': 'application/json,text/plain,*/*',
+    'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.6',
+    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    'X-IG-App-ID': '936619743392459'
+  };
+  if (env.INSTAGRAM_SESSIONID) headers.Cookie = `sessionid=${env.INSTAGRAM_SESSIONID};`;
 
-async function fetchViaGraphQL(username, count) {
-  // Step 1: Get user ID via web profile info
-  const userResp = await fetch(
-    `https://i.instagram.com/api/v1/users/web_profile_info/?username=${username}`,
-    {
-      headers: {
-        'User-Agent': 'Instagram 275.0.0.27.98 Android (30/11; 420dpi; 1080x2400; samsung; SM-A515F; a51; exynos9611; en_US; 458229258)',
-        'X-IG-App-ID': '936619743392459',
-        'Accept': '*/*',
-        'Accept-Language': 'en-US',
-      },
-    }
-  );
-
-  if (!userResp.ok) throw new Error(`Web profile request failed: ${userResp.status}`);
-
-  const userData = await userResp.json();
-  const edges = userData?.data?.user?.edge_owner_to_timeline_media?.edges;
-
-  if (!edges || edges.length === 0) throw new Error('No posts found in GraphQL response');
+  const response = await fetch(`https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`, { headers });
+  if (!response.ok) throw new Error(`web_profile_info ${response.status}`);
+  const data = await response.json();
+  const edges = data?.data?.user?.edge_owner_to_timeline_media?.edges || [];
+  if (!edges.length) throw new Error('sem edges no web_profile_info');
 
   return edges.slice(0, count).map(edge => {
-    const node = edge.node;
+    const n = edge.node;
     return {
-      id: node.id,
-      shortcode: node.shortcode,
-      permalink: `https://www.instagram.com/p/${node.shortcode}/`,
-      thumbnail_url: node.thumbnail_src || node.display_url,
-      caption: node.edge_media_to_caption?.edges?.[0]?.node?.text || '',
-      timestamp: new Date(node.taken_at_timestamp * 1000).toISOString(),
-      likes: node.edge_liked_by?.count || 0,
-      comments: node.edge_media_to_comment?.count || 0,
-      is_video: node.is_video || false,
-      video_url: node.video_url || null,
-      dimensions: node.dimensions || { width: 1080, height: 1080 },
+      id: n.id,
+      shortcode: n.shortcode,
+      permalink: `https://www.instagram.com/${n.is_video ? 'reel' : 'p'}/${n.shortcode}/`,
+      thumbnail_url: n.thumbnail_src || n.display_url,
+      caption: n.edge_media_to_caption?.edges?.[0]?.node?.text || '',
+      timestamp: n.taken_at_timestamp ? new Date(n.taken_at_timestamp * 1000).toISOString() : '',
+      likes: n.edge_liked_by?.count || 0,
+      comments: n.edge_media_to_comment?.count || 0,
+      is_video: Boolean(n.is_video)
     };
   });
 }
 
-// ─── Strategy 2: oEmbed Approach ───────────────────────────────────────────
-
-async function fetchViaOembed(username, count) {
-  // Fetch the profile page HTML to extract post shortcodes
-  const profileResp = await fetch(`https://www.instagram.com/${username}/`, {
+async function fetchViaProfileHtml(username, count) {
+  const response = await fetch(`https://www.instagram.com/${encodeURIComponent(username)}/`, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.5',
-    },
-    redirect: 'follow',
+      'Accept': 'text/html,application/xhtml+xml',
+      'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.6',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+    }
   });
-
-  if (!profileResp.ok) throw new Error(`Profile page fetch failed: ${profileResp.status}`);
-
-  const html = await profileResp.text();
-
-  // Extract shortcodes from HTML
-  const shortcodeRegex = /"shortcode":"([A-Za-z0-9_-]+)"/g;
-  const shortcodes = [];
-  let match;
-  while ((match = shortcodeRegex.exec(html)) !== null) {
-    if (!shortcodes.includes(match[1])) {
-      shortcodes.push(match[1]);
-    }
-  }
-
-  if (shortcodes.length === 0) throw new Error('No shortcodes found in profile page');
-
-  // Use oEmbed for each shortcode to get metadata
-  const posts = [];
-  for (const shortcode of shortcodes.slice(0, count)) {
-    try {
-      const oembedResp = await fetch(
-        `https://api.instagram.com/oembed/?url=https://www.instagram.com/p/${shortcode}/&omitscript=true`,
-        {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; InstagramFeedBot/1.0)',
-          },
-        }
-      );
-
-      if (oembedResp.ok) {
-        const data = await oembedResp.json();
-        posts.push({
-          id: shortcode,
-          shortcode: shortcode,
-          permalink: `https://www.instagram.com/p/${shortcode}/`,
-          thumbnail_url: data.thumbnail_url || '',
-          caption: data.title || '',
-          timestamp: data.upload_date || new Date().toISOString(),
-          likes: 0,
-          comments: 0,
-          is_video: false,
-          video_url: null,
-          dimensions: { width: data.thumbnail_width || 1080, height: data.thumbnail_height || 1080 },
-        });
-      }
-    } catch (e) {
-      // Skip individual post failures
-      console.log(`oEmbed failed for ${shortcode}:`, e.message);
-    }
-  }
-
-  return posts;
+  if (!response.ok) throw new Error(`profile_html ${response.status}`);
+  const html = await response.text();
+  const shortcodes = [...html.matchAll(/"shortcode"\s*:\s*"([A-Za-z0-9_-]+)"/g)].map(m => m[1]);
+  const displayUrls = [...html.matchAll(/"display_url"\s*:\s*"([^"]+)"/g)].map(m => safeJsonString(m[1]));
+  const unique = [...new Set(shortcodes)].slice(0, count);
+  if (!unique.length) throw new Error('sem shortcodes no HTML');
+  return unique.map((shortcode, i) => ({
+    id: shortcode,
+    shortcode,
+    permalink: `https://www.instagram.com/p/${shortcode}/`,
+    thumbnail_url: displayUrls[i] || '',
+    caption: '',
+    timestamp: '',
+    likes: 0,
+    comments: 0,
+    is_video: false
+  }));
 }
 
-// ─── Strategy 3: RSS Bridge ────────────────────────────────────────────────
-
-async function fetchViaRSSBridge(username, count) {
-  // Try multiple public RSS Bridge instances
-  const bridges = [
-    `https://rss.app/feeds/v1.1/ig/${username}.json`,
-    `https://rsshub.app/instagram/user/${username}`,
-    `https://bridge.suumitsa.social/?action=display&bridge=Instagram&u=${username}&format=json`,
+async function fetchViaRss(username, count) {
+  const endpoints = [
+    `https://rss.app/feeds/v1.1/ig/${encodeURIComponent(username)}.json`,
+    `https://rsshub.app/instagram/user/${encodeURIComponent(username)}`
   ];
 
-  for (const bridgeUrl of bridges) {
+  for (const endpoint of endpoints) {
+    const response = await fetch(endpoint, { headers: { 'Accept': 'application/json,application/rss+xml,text/xml' } });
+    if (!response.ok) continue;
+    const text = await response.text();
     try {
-      const resp = await fetch(bridgeUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; InstagramFeedBot/1.0)',
-          'Accept': 'application/json, application/rss+xml, application/xml, text/xml',
-        },
-        signal: AbortSignal.timeout(10000),
-      });
-
-      if (!resp.ok) continue;
-
-      const contentType = resp.headers.get('content-type') || '';
-      const text = await resp.text();
-
-      if (contentType.includes('json')) {
-        const data = JSON.parse(text);
-        // Try common JSON structures
-        const items = data.items || data.data || data.posts || [];
-        if (items.length > 0) {
-          return items.slice(0, count).map(item => ({
-            id: item.id || item.guid || item.link?.split('/p/')?.[1]?.replace('/', '') || Math.random().toString(36).slice(2),
-            shortcode: item.link?.split('/p/')?.[1]?.replace('/', '') || '',
-            permalink: item.link || item.url || '',
-            thumbnail_url: item.thumbnail || item.image || item.enclosure?.url || '',
-            caption: item.title || item.description || item.caption || '',
-            timestamp: item.pubDate || item.published || item.date || new Date().toISOString(),
-            likes: 0,
-            comments: 0,
-            is_video: false,
-            video_url: null,
-            dimensions: { width: 1080, height: 1080 },
-          }));
-        }
-      } else if (contentType.includes('xml') || text.trim().startsWith('<?xml') || text.trim().startsWith('<rss')) {
-        // Parse RSS/XML
-        const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-        const posts = [];
-        let itemMatch;
-        while ((itemMatch = itemRegex.exec(text)) !== null && posts.length < count) {
-          const itemXml = itemMatch[1];
-          const title = extractXmlTag(itemXml, 'title') || '';
-          const link = extractXmlTag(itemXml, 'link') || '';
-          const pubDate = extractXmlTag(itemXml, 'pubDate') || '';
-          const description = extractXmlTag(itemXml, 'description') || '';
-          const enclosureMatch = itemXml.match(/<enclosure[^>]+url="([^"]+)"/);
-          const thumbnail = enclosureMatch ? enclosureMatch[1] : '';
-
-          posts.push({
-            id: link.split('/p/')?.[1]?.replace('/', '') || Math.random().toString(36).slice(2),
-            shortcode: link.split('/p/')?.[1]?.replace('/', '') || '',
-            permalink: link,
-            thumbnail_url: thumbnail,
-            caption: title || description,
-            timestamp: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
-            likes: 0,
-            comments: 0,
-            is_video: false,
-            video_url: null,
-            dimensions: { width: 1080, height: 1080 },
-          });
-        }
-        if (posts.length > 0) return posts;
-      }
-    } catch (e) {
-      console.log(`RSS Bridge ${bridgeUrl} failed:`, e.message);
-    }
+      const json = JSON.parse(text);
+      const items = json.items || json.data || [];
+      if (items.length) return items.slice(0, count).map(item => ({
+        id: item.id || item.url || item.link,
+        shortcode: extractShortcode(item.url || item.link || ''),
+        permalink: item.url || item.link,
+        thumbnail_url: item.image || item.thumbnail || item.enclosure?.url || '',
+        caption: item.title || item.content_text || item.content || '',
+        timestamp: item.date_published || item.pubDate || '',
+        likes: 0,
+        comments: 0,
+        is_video: String(item.url || item.link || '').includes('/reel/')
+      }));
+    } catch (_) {}
   }
-
-  throw new Error('All RSS Bridge attempts failed');
+  throw new Error('rss indisponível');
 }
 
-function extractXmlTag(xml, tag) {
-  const regex = new RegExp(`<${tag}[^>]*>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?</${tag}>`, 'i');
-  const match = xml.match(regex);
-  return match ? match[1].trim() : '';
-}
-
-// ─── Strategy 4: Hardcoded Fallback ────────────────────────────────────────
-
-function getHardcodedPosts(username) {
-  // These are placeholder posts - replace with real data if API access changes
-  return [
-    {
-      id: 'fallback_1',
-      shortcode: 'example1',
-      permalink: `https://www.instagram.com/${username}/`,
-      thumbnail_url: '',
-      caption: '🧊 ¡Paletas artesanales de Macadania! Sabor único y natural 🌿',
-      timestamp: new Date().toISOString(),
-      likes: 0,
-      comments: 0,
-      is_video: false,
-      video_url: null,
-      dimensions: { width: 1080, height: 1080 },
-    },
-    {
-      id: 'fallback_2',
-      shortcode: 'example2',
-      permalink: `https://www.instagram.com/${username}/`,
-      thumbnail_url: '',
-      caption: '🍫 Chocolate y macadamia: la combinación perfecta',
-      timestamp: new Date(Date.now() - 86400000).toISOString(),
-      likes: 0,
-      comments: 0,
-      is_video: false,
-      video_url: null,
-      dimensions: { width: 1080, height: 1080 },
-    },
-    {
-      id: 'fallback_3',
-      shortcode: 'example3',
-      permalink: `https://www.instagram.com/${username}/`,
-      thumbnail_url: '',
-      caption: '🌴 Naturaleza en cada bocado. Hecho con amor ❤️',
-      timestamp: new Date(Date.now() - 172800000).toISOString(),
-      likes: 0,
-      comments: 0,
-      is_video: false,
-      video_url: null,
-      dimensions: { width: 1080, height: 1080 },
-    },
-  ];
-}
-
-// ─── Rate Limiting ─────────────────────────────────────────────────────────
-
-const rateLimitMap = new Map();
-const RATE_LIMIT = 30; // requests per minute
-const RATE_WINDOW = 60 * 1000; // 1 minute
-
-function isRateLimited(key) {
-  const now = Date.now();
-  if (!rateLimitMap.has(key)) {
-    rateLimitMap.set(key, { count: 1, windowStart: now });
-    return false;
-  }
-
-  const entry = rateLimitMap.get(key);
-  if (now - entry.windowStart > RATE_WINDOW) {
-    entry.count = 1;
-    entry.windowStart = now;
-    return false;
-  }
-
-  entry.count++;
-  return entry.count > RATE_LIMIT;
-}
-
-// ─── CORS & Response Helpers ───────────────────────────────────────────────
-
-function getCorsHeaders(request, env) {
-  const origin = request.headers.get('Origin') || '*';
-  const allowedOrigins = (env.ALLOWED_ORIGINS || '*').split(',').map(s => s.trim());
-  const allowedOrigin = allowedOrigins.includes('*') ? origin : (
-    allowedOrigins.includes(origin) ? origin : allowedOrigins[0]
-  );
-
-  return {
-    'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Accept',
-    'Access-Control-Max-Age': '86400',
-  };
-}
-
-function handleOptions(request, env) {
-  return new Response(null, {
-    status: 204,
-    headers: getCorsHeaders(request, env),
+function normalizePosts(posts) {
+  return (posts || []).map((post, index) => {
+    const shortcode = post.shortcode || extractShortcode(post.permalink || post.url || '') || post.id || `post-${index}`;
+    return {
+      id: String(post.id || shortcode),
+      shortcode: String(shortcode),
+      permalink: post.permalink || post.url || `https://www.instagram.com/p/${shortcode}/`,
+      thumbnail_url: post.thumbnail_url || post.thumbnail || post.display_url || post.image || '',
+      caption: cleanText(post.caption || post.title || ''),
+      timestamp: post.timestamp || post.date || '',
+      likes: Number(post.likes || 0),
+      comments: Number(post.comments || 0),
+      is_video: Boolean(post.is_video || String(post.permalink || post.url || '').includes('/reel/'))
+    };
   });
 }
 
-function jsonResponse(data, status, request, env) {
+function jsonResponse(data, status, request, env, extraHeaders = {}) {
   return new Response(JSON.stringify(data, null, 2), {
     status,
     headers: {
-      ...getCorsHeaders(request, env),
-      'Content-Type': 'application/json',
-      'Cache-Control': `public, max-age=${DEFAULT_CACHE_TTL}`,
-    },
+      'Content-Type': 'application/json; charset=utf-8',
+      ...corsHeaders(request, env),
+      ...extraHeaders
+    }
   });
+}
+
+function optionsResponse(request, env) {
+  return new Response(null, { status: 204, headers: corsHeaders(request, env) });
+}
+
+function corsHeaders(request, env) {
+  const origin = request.headers.get('Origin') || '*';
+  const allowed = (env.ALLOWED_ORIGINS || '*').split(',').map(v => v.trim()).filter(Boolean);
+  const allowOrigin = allowed.includes('*') || allowed.includes(origin) ? origin : allowed[0] || '*';
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'GET,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type,Accept',
+    'Vary': 'Origin'
+  };
+}
+
+function sanitizeUsername(value) {
+  return String(value || DEFAULT_USERNAME).replace(/^@/, '').replace(/[^A-Za-z0-9._]/g, '').slice(0, 40) || DEFAULT_USERNAME;
+}
+
+function clamp(value, min, max) {
+  if (!Number.isFinite(value)) return min;
+  return Math.max(min, Math.min(max, value));
+}
+
+function cleanText(value) {
+  return String(value || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function extractShortcode(url) {
+  const match = String(url || '').match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
+  return match ? match[1] : '';
+}
+
+function safeJsonString(value) {
+  try { return JSON.parse(`"${value}"`); } catch (_) { return value; }
 }
