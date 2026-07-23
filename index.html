@@ -99,6 +99,7 @@
         .cardapio-body{padding:1.5rem}.cardapio-tag{display:inline-block;padding:.3rem .8rem;background:rgba(205,133,63,.15);color:var(--accent-gold);border-radius:50px;font-size:.75rem;font-weight:600;margin-bottom:.8rem}
         .cardapio-card h3{font-size:1.3rem;margin-bottom:.5rem}.cardapio-card p{color:var(--text-muted);font-size:.9rem;line-height:1.5}
         .cardapio-price{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--accent-gold);margin-top:.8rem;font-weight:700}
+        .media-showcase{background:linear-gradient(180deg,var(--bg-dark),var(--bg-section));position:relative;overflow:hidden}.media-showcase::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(205,133,63,.10),transparent 35%),radial-gradient(circle at 80% 70%,rgba(192,57,43,.10),transparent 35%);pointer-events:none}.media-showcase .container{position:relative;z-index:1}.featured-video{background:var(--bg-card);border:1px solid rgba(205,133,63,.28);border-radius:20px;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.45);margin-bottom:2rem}.featured-video video{display:block;width:100%;aspect-ratio:16/9;background:#000;object-fit:cover}.featured-video-caption{padding:1.4rem 1.6rem;color:var(--text-light);line-height:1.7}.featured-video-caption strong{color:var(--accent-gold);font-family:'Playfair Display',serif;font-size:1.25rem}.brand-assets-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem}.brand-asset-card{min-height:260px;background:linear-gradient(135deg,#151515,#090909);border:1px solid var(--border-subtle);border-radius:18px;padding:1.5rem;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.brand-asset-card::after{content:attr(data-label);position:absolute;left:1rem;bottom:1rem;color:var(--accent-gold);font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase}.brand-asset-card img{max-width:100%;max-height:210px;object-fit:contain;filter:brightness(0) saturate(100%) invert(61%) sepia(62%) saturate(405%) hue-rotate(347deg) brightness(89%) contrast(87%);opacity:.92}.brand-asset-card.logo img{max-height:250px}
         .promos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem}
         .promo-card{background:linear-gradient(135deg,var(--bg-card),#1a1000);border:1px solid rgba(205,133,63,.3);border-radius:16px;padding:2rem;text-align:center;position:relative;overflow:hidden}
         .promo-day{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--accent-gold);font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:.5rem}
@@ -150,6 +151,7 @@
         <li><a href="#sobre">Sobre</a></li>
         <li><a href="#diferenciais">Diferenciais</a></li>
         <li><a href="#cardapio">Cardápio</a></li>
+        <li><a href="#midia">Mídia</a></li>
         <li><a href="#promos">Promoções</a></li>
         <li><a href="#reviews">Avaliações</a></li>
         <li><a href="#localizacao">Localização</a></li>
@@ -161,7 +163,7 @@
 <!-- HERO -->
 <section class="hero" id="home">
     <video autoplay muted loop playsinline class="hero-video">
-        <source src="assets/videos/hero-bg.mp4" type="video/mp4">
+        <source src="assets/videos/tv-hero-loop.mp4" type="video/mp4">
     </video>
     <div class="hero-overlay"></div>
     <div class="hero-flames"></div>
@@ -227,6 +229,31 @@
             <div class="cardapio-card fade-in"><img src="https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=600&q=80" alt="Torresmo de Rolo" class="cardapio-img" loading="lazy"><div class="cardapio-body"><span class="cardapio-tag">Queridinho</span><h3>Torresmo de Rolo</h3><p>Crocante por fora, macio por dentro. A marca registrada da casa.</p><div class="cardapio-price">A partir de R$ 39,90</div></div></div>
             <div class="cardapio-card fade-in"><img src="https://images.unsplash.com/photo-1615937722923-67f6deaf2cc9?w=600&q=80" alt="Costela no Espeto" class="cardapio-img" loading="lazy"><div class="cardapio-body"><span class="cardapio-tag">Tradição</span><h3>Costela no Espeto</h3><p>Horas na brasa, desmanchando. A costela mais suculenta de Piracicaba.</p><div class="cardapio-price">A partir de R$ 79,90</div></div></div>
             <div class="cardapio-card fade-in"><img src="https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=600&q=80" alt="Pratos da Casa" class="cardapio-img" loading="lazy"><div class="cardapio-body"><span class="cardapio-tag">Almoço</span><h3>Pratos da Casa</h3><p>Almoço caprichado com pratos diferenciados, ambiente climatizado.</p><div class="cardapio-price">A partir de R$ 45,90</div></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- MIDIA OFICIAL -->
+<section class="media-showcase" id="midia">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="tag">Mídia oficial</div>
+            <h2>Da brasa para a tela</h2>
+            <p>Vídeo institucional e elementos visuais oficiais do Maça da Paleta, direto do material de campanha.</p>
+        </div>
+        <div class="featured-video fade-in">
+            <video controls playsinline preload="metadata" poster="assets/brand/logo-seal.png">
+                <source src="assets/videos/video-tv.mp4" type="video/mp4">
+            </video>
+            <div class="featured-video-caption">
+                <strong>Vídeo TV</strong><br>
+                Uma amostra da experiência Maça da Paleta: cortes selecionados, brasa no ponto e o clima da steakhouse.
+            </div>
+        </div>
+        <div class="brand-assets-grid">
+            <div class="brand-asset-card logo fade-in" data-label="Selo oficial"><img src="assets/brand/logo-seal.png" alt="Selo oficial Maça da Paleta" loading="lazy"></div>
+            <div class="brand-asset-card fade-in" data-label="Assinatura"><img src="assets/brand/wordmark-horizontal.png" alt="Assinatura horizontal Maça da Paleta" loading="lazy"></div>
+            <div class="brand-asset-card fade-in" data-label="Marca"><img src="assets/brand/wordmark-vertical.png" alt="Marca vertical Maça da Paleta" loading="lazy"></div>
         </div>
     </div>
 </section>
@@ -317,7 +344,7 @@
 <footer>
     <div class="footer-grid">
         <div class="footer-brand"><a href="#" class="nav-logo"><span>Maça</span> da Paleta</a><p>A melhor Steakhouse de Piracicaba. Cortes nobres na brasa, empório de carnes, açougue próprio e chopp gelado.</p></div>
-        <div class="footer-col"><h4>Navegação</h4><a href="#sobre">Sobre Nós</a><a href="#diferenciais">Diferenciais</a><a href="#cardapio">Cardápio</a><a href="#promos">Promoções</a></div>
+        <div class="footer-col"><h4>Navegação</h4><a href="#sobre">Sobre Nós</a><a href="#diferenciais">Diferenciais</a><a href="#cardapio">Cardápio</a><a href="#midia">Mídia</a><a href="#promos">Promoções</a></div>
         <div class="footer-col"><h4>Contato</h4><a href="https://wa.me/5519981458256">WhatsApp</a><a href="tel:+551****8256">(19) 98145-8256</a><a href="https://www.instagram.com/macadapaleta/">Instagram</a><a href="https://www.facebook.com/p/Ma%C3%A7%C3%A3-da-Paleta-61578924741126/">Facebook</a></div>
         <div class="footer-col"><h4>Localização</h4><a href="https://www.google.com/maps/place/Ma%C3%A7%C3%A3+da+Paleta/@-22.7024316,-47.6786792,17z/" target="_blank">Av. Jaime Pereira, 3865<br>Jardim Parque Jupia<br>Piracicaba - SP</a></div>
     </div>
