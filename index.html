@@ -31,7 +31,7 @@
             "addressCountry": "BR"
         },
         "geo": { "@type": "GeoCoordinates", "latitude": -22.7024316, "longitude": -47.6761043 },
-        "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5.0", "reviewCount": "24", "bestRating": "5" },
+        "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "30", "bestRating": "5" },
         "servesCuisine": ["Churrasco", "Steakhouse", "Carnes"],
         "priceRange": "$$",
         "openingHoursSpecification": [
@@ -61,7 +61,7 @@
         .nav-cta:hover{background:var(--accent-ember);transform:scale(1.05)}
         .hamburger{display:none;cursor:pointer;flex-direction:column;gap:5px}.hamburger span{width:25px;height:2px;background:var(--text-white);transition:.3s}
         .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;text-align:center;background:linear-gradient(135deg,#0a0a0a 0%,#1a0a00 30%,#2a0f00 60%,#0a0a0a 100%);overflow:hidden}
-        .hero-video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0.4}
+        .hero-slideshow{position:absolute;inset:0;z-index:0}.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;animation:heroPhotoFade 25s infinite}.hero-slide:nth-child(1){background-image:url('assets/photos/hero-01.jpg');animation-delay:0s}.hero-slide:nth-child(2){background-image:url('assets/photos/hero-02.jpg');animation-delay:5s}.hero-slide:nth-child(3){background-image:url('assets/photos/hero-03.jpg');animation-delay:10s}.hero-slide:nth-child(4){background-image:url('assets/photos/hero-04.jpg');animation-delay:15s}.hero-slide:nth-child(5){background-image:url('assets/photos/hero-05.jpg');animation-delay:20s}
         .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,0.7) 0%,rgba(26,10,0,0.5) 50%,rgba(10,10,10,0.8) 100%);z-index:1}
         .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 80%,rgba(205,133,63,.15) 0%,transparent 60%)}
         .hero-flames{position:absolute;bottom:0;left:0;right:0;height:200px;background:linear-gradient(to top,rgba(192,57,43,.1),transparent)}
@@ -100,10 +100,10 @@
         .cardapio-card h3{font-size:1.3rem;margin-bottom:.5rem}.cardapio-card p{color:var(--text-muted);font-size:.9rem;line-height:1.5}
         .cardapio-price{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--accent-gold);margin-top:.8rem;font-weight:700}
         .media-showcase{background:linear-gradient(180deg,var(--bg-dark),var(--bg-section));position:relative;overflow:hidden}.media-showcase::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(205,133,63,.10),transparent 35%),radial-gradient(circle at 80% 70%,rgba(192,57,43,.10),transparent 35%);pointer-events:none}.media-showcase .container{position:relative;z-index:1}.featured-video{background:var(--bg-card);border:1px solid rgba(205,133,63,.28);border-radius:20px;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.45);margin-bottom:2rem}.featured-video video{display:block;width:100%;aspect-ratio:16/9;background:#000;object-fit:cover}.featured-video-caption{padding:1.4rem 1.6rem;color:var(--text-light);line-height:1.7}.featured-video-caption strong{color:var(--accent-gold);font-family:'Playfair Display',serif;font-size:1.25rem}.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem}.gallery-card{position:relative;min-height:260px;border-radius:18px;overflow:hidden;background:var(--bg-card);border:1px solid var(--border-subtle);box-shadow:0 18px 45px rgba(0,0,0,.35)}.gallery-card img{width:100%;height:100%;min-height:260px;object-fit:cover;display:block;transition:transform .45s ease,filter .45s ease}.gallery-card:hover img{transform:scale(1.06);filter:saturate(1.08) contrast(1.05)}.gallery-card span{position:absolute;left:0;right:0;bottom:0;padding:2.5rem 1rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.88));font-weight:700;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.7)}
-        .promos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem}
-        .promo-card{background:linear-gradient(135deg,var(--bg-card),#1a1000);border:1px solid rgba(205,133,63,.3);border-radius:16px;padding:2rem;text-align:center;position:relative;overflow:hidden}
-        .promo-day{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--accent-gold);font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:.5rem}
-        .promo-card h3{font-size:1.4rem;margin-bottom:.5rem}.promo-card p{color:var(--text-muted);font-size:.9rem}.promo-icon{font-size:2.5rem;margin-bottom:1rem}
+        .promos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+        .promo-card{background:linear-gradient(135deg,var(--bg-card),#1a1000);border:1px solid rgba(205,133,63,.3);border-radius:18px;text-align:left;position:relative;overflow:hidden;box-shadow:0 18px 45px rgba(0,0,0,.35)}
+        .promo-card img{width:100%;height:300px;object-fit:cover;display:block}.promo-body{padding:1.6rem}.promo-day{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--accent-gold);font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:.5rem}
+        .promo-card h3{font-size:1.5rem;margin-bottom:.5rem}.promo-card p{color:var(--text-light);font-size:.95rem;line-height:1.6}.promo-badge{display:inline-block;margin-top:1rem;padding:.45rem .9rem;border-radius:999px;background:rgba(205,133,63,.16);color:var(--accent-gold);font-weight:700;font-size:.82rem}
         .reviews{background:var(--bg-section)}
         .reviews-header-info{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-bottom:3rem;flex-wrap:wrap}
         .reviews-score{font-family:'Playfair Display',serif;font-size:4rem;font-weight:900;color:var(--accent-gold)}.reviews-stars{font-size:1.8rem;letter-spacing:2px}.reviews-count{color:var(--text-muted);font-size:1rem}
@@ -136,6 +136,7 @@
         .whatsapp-pulse{position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--whatsapp-green);animation:pulse 2s ease-in-out infinite}
         @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes heroPhotoFade{0%,100%{opacity:0;transform:scale(1)}4%,20%{opacity:.48}24%{opacity:0;transform:scale(1.06)}}
         @keyframes pulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.3);opacity:0}}
         .fade-in{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}.fade-in.visible{opacity:1;transform:translateY(0)}
         @media(max-width:768px){.nav-links{display:none}.hamburger{display:flex}.nav-links.active{display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:rgba(10,10,10,.98);padding:2rem;gap:1.5rem;text-align:center}.sobre-grid{grid-template-columns:1fr}.sobre-img{height:300px}.localizacao-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}.hero-stats{gap:1.5rem}.hero-stat .number{font-size:1.8rem}section{padding:4rem 1rem}}
@@ -162,9 +163,13 @@
 
 <!-- HERO -->
 <section class="hero" id="home">
-    <video autoplay muted loop playsinline class="hero-video">
-        <source src="assets/videos/tv-hero-loop.mp4" type="video/mp4">
-    </video>
+    <div class="hero-slideshow" aria-hidden="true">
+        <div class="hero-slide"></div>
+        <div class="hero-slide"></div>
+        <div class="hero-slide"></div>
+        <div class="hero-slide"></div>
+        <div class="hero-slide"></div>
+    </div>
     <div class="hero-overlay"></div>
     <div class="hero-flames"></div>
     <div class="hero-content">
@@ -176,8 +181,8 @@
             <a href="#cardapio" class="btn-secondary">Ver Cardápio</a>
         </div>
         <div class="hero-stats">
-            <div class="hero-stat"><div class="number">5.0</div><div class="label">⭐ Google Reviews</div></div>
-            <div class="hero-stat"><div class="number">24</div><div class="label">Avaliações</div></div>
+            <div class="hero-stat"><div class="number">4.9</div><div class="label">⭐ Google Reviews</div></div>
+            <div class="hero-stat"><div class="number">30</div><div class="label">Avaliações</div></div>
             <div class="hero-stat"><div class="number">100%</div><div class="label">Cortes Nobres</div></div>
         </div>
     </div>
@@ -265,12 +270,10 @@
 <!-- PROMOCOES -->
 <section class="promos" id="promos">
     <div class="container">
-        <div class="section-header fade-in"><div class="tag">Aproveite</div><h2>Promoções da Semana</h2><p>Motivos extras para visitar o Maça da Paleta toda semana.</p></div>
+        <div class="section-header fade-in"><div class="tag">Aproveite</div><h2>Promoções da Semana</h2><p>Do almoço caprichado ao chopp gelado: escolha seu momento para visitar o Maça da Paleta.</p></div>
         <div class="promos-grid">
-            <div class="promo-card fade-in"><div class="promo-icon">🍺</div><div class="promo-day">Terça</div><h3>Chopp em Dobro</h3><p>A cada chopp, o segundo é por nossa conta!</p></div>
-            <div class="promo-card fade-in"><div class="promo-icon">🍹</div><div class="promo-day">Quarta</div><h3>Double Drink</h3><p>Double Drink e Double Soda Italiana.</p></div>
-            <div class="promo-card fade-in"><div class="promo-icon">🥩</div><div class="promo-day">Todos os Dias</div><h3>Kit Semanal</h3><p>Cortes selecionados em porções de 500g para levar pra casa.</p></div>
-            <div class="promo-card fade-in"><div class="promo-icon">👶</div><div class="promo-day">Especial</div><h3>Baby Beef para 2</h3><p>Baby beef fatiado com acompanhamentos. R$ 164,90.</p></div>
+            <div class="promo-card fade-in"><img src="assets/photos/promo-almoco-executivo.jpg" alt="Almoço executivo do Maça da Paleta" loading="lazy"><div class="promo-body"><div class="promo-day">Quinta e Sexta</div><h3>Almoço Executivo</h3><p>Pratos bem servidos, carnes no ponto e acompanhamentos para deixar o almoço da semana muito melhor.</p><span class="promo-badge">Quinta e sexta no almoço</span></div></div>
+            <div class="promo-card fade-in"><img src="assets/photos/promo-chopp-em-dobro.jpg" alt="Terça Chopp em Dobro no Maça da Paleta" loading="lazy"><div class="promo-body"><div class="promo-day">Terça</div><h3>Chopp em Dobro</h3><p>A cada chopp, o segundo é por nossa conta. Brasa acesa, copo gelado e aquele motivo extra para reunir a turma.</p><span class="promo-badge">Terça Chopp em Dobro</span></div></div>
         </div>
     </div>
 </section>
@@ -280,8 +283,8 @@
     <div class="container">
         <div class="section-header fade-in"><div class="tag">O que dizem sobre nós</div><h2>Avaliações do Google</h2><p>A satisfação dos nossos clientes é a nossa maior conquista.</p></div>
         <div class="reviews-header-info fade-in">
-            <div class="reviews-score">5.0</div>
-            <div><div class="reviews-stars">⭐⭐⭐⭐⭐</div><div class="reviews-count">Baseado em 24 avaliações no Google</div></div>
+            <div class="reviews-score">4.9</div>
+            <div><div class="reviews-stars">⭐⭐⭐⭐⭐</div><div class="reviews-count">Baseado em 30 avaliações no Google</div></div>
         </div>
         <div class="reviews-grid">
             <div class="review-card fade-in"><div class="review-header"><div class="review-avatar">ML</div><div><div class="review-name">Mércia Lavínia</div><div class="review-date">7 meses atrás</div></div></div><div class="review-stars">⭐⭐⭐⭐⭐</div><p class="review-text">"Simplesmente impecável! Delicioso, climatizado e muito agradável. A carne no PONTO PERFEITO, derretendo na boca. Crédito ao Chef e toda equipe."</p><div class="review-source">📍 Avaliação via Google</div></div>
@@ -291,7 +294,7 @@
             <div class="review-card fade-in"><div class="review-header"><div class="review-avatar">TF</div><div><div class="review-name">Tiago Fernandez</div><div class="review-date">3 meses atrás</div></div></div><div class="review-stars">⭐⭐⭐⭐⭐</div><p class="review-text">"Além da comida maravilhosa, o que conquista é o atendimento atencioso e o ambiente super convidativo. Um paraíso gastronômico em Piracicaba!"</p><div class="review-source">📍 Avaliação via Google</div></div>
             <div class="review-card fade-in"><div class="review-header"><div class="review-avatar">VS</div><div><div class="review-name">Vanessa Santos</div><div class="review-date">3 meses atrás</div></div></div><div class="review-stars">⭐⭐⭐⭐⭐</div><p class="review-text">"Fui com minha família, a experiência foi ótima. Um dos melhores atendimentos de Piracicaba. A carne era muito boa."</p><div class="review-source">📍 Avaliação via Google</div></div>
         </div>
-        <div style="text-align:center;margin-top:2.5rem;"><a href="https://www.google.com/maps/place/Ma%C3%A7%C3%A3+da+Paleta/@-22.6996558,-47.6808991,15.5z/data=!4m19!1m10!3m9!1s0x94c633a75463bfbd:0x8b2e4a23a3090c7c!2zTWHDp8OjIGRhIFBhbGV0YQ!8m2!3d-22.7024316!4d-47.6761043!10e5!14m1!1BCgIgAQ!16s%2Fg%2F11xrj5z71y!3m7!1s0x94c633a75463bfbd:0x8b2e4a23a3090c7c!8m2!3d-22.7024316!4d-47.6761043!9m1!1b1!16s%2Fg%2F11xrj5z71y?entry=ttu&amp;g_ep=EgoyMDI2MDcyMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" class="btn-secondary" style="display:inline-block;">Ver todas as 24 avaliações no Google</a></div>
+        <div style="text-align:center;margin-top:2.5rem;"><a href="https://www.google.com/maps/place/Ma%C3%A7%C3%A3+da+Paleta/@-22.6996558,-47.6808991,15.5z/data=!4m19!1m10!3m9!1s0x94c633a75463bfbd:0x8b2e4a23a3090c7c!2zTWHDp8OjIGRhIFBhbGV0YQ!8m2!3d-22.7024316!4d-47.6761043!10e5!14m1!1BCgIgAQ!16s%2Fg%2F11xrj5z71y!3m7!1s0x94c633a75463bfbd:0x8b2e4a23a3090c7c!8m2!3d-22.7024316!4d-47.6761043!9m1!1b1!16s%2Fg%2F11xrj5z71y?entry=ttu&amp;g_ep=EgoyMDI2MDcyMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" class="btn-secondary" style="display:inline-block;">Ver todas as 30 avaliações no Google</a></div>
     </div>
 </section>
 
