@@ -300,13 +300,23 @@
             <h2>No Instagram</h2>
             <p>Acompanhe nossas novidades, promoções e bastidores pelo @macadapaleta</p>
         </div>
-        <div id="instagram-feed" class="fade-in"></div>
+        <div class="instagram-embeds fade-in">
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DXr7SYAjNDJ/" data-instgrm-version="14"></blockquote>
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DXNWGTOjWx1/" data-instgrm-version="14"></blockquote>
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DXNWhk6jZZj/" data-instgrm-version="14"></blockquote>
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DUoTSNPkr0U/" data-instgrm-version="14"></blockquote>
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DVWFAZIArb6/" data-instgrm-version="14"></blockquote>
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DWHnqP7EVVD/" data-instgrm-version="14"></blockquote>
+        </div>
+        <div class="instagram-cta fade-in"><a href="https://www.instagram.com/macadapaleta/" target="_blank" rel="noopener" class="btn-secondary">Ver mais no Instagram</a></div>
     </div>
 </section>
 
 <style>
     .instagram-section { background: var(--bg-dark); }
-    #instagram-feed { max-width: 900px; margin: 0 auto; }
+    .instagram-embeds { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.5rem; align-items:start; max-width:1180px; margin:0 auto; }
+    .instagram-embeds .instagram-media { min-width:0 !important; width:100% !important; max-width:100% !important; margin:0 auto !important; border-radius:16px !important; overflow:hidden; background:var(--bg-card) !important; }
+    .instagram-cta { text-align:center; margin-top:2rem; }
 </style>
 
 <!-- LOCALIZACAO -->
@@ -365,22 +375,8 @@
     document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t){t.scrollIntoView({behavior:'smooth',block:'start'});document.getElementById('navLinks').classList.remove('active')}})});
 </script>
 
-<!-- Instagram Feed Plugin -->
-<script src="instagram-plugin/instagram-feed.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    new InstagramFeed({
-        container: '#instagram-feed',
-        username: 'macadapaleta',
-        workerUrl: '',
-        fallbackJson: 'instagram-plugin/instagram-fallback.json',
-        count: 6,
-        columns: 3,
-        showCaption: true,
-        showStats: false
-    }).load();
-});
-</script>
+<!-- Instagram Embed Script -->
+<script async src="https://www.instagram.com/embed.js"></script>
 
 </body>
 </html>
