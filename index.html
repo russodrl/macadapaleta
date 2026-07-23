@@ -99,6 +99,7 @@
         .cardapio-body{padding:1.5rem}.cardapio-tag{display:inline-block;padding:.3rem .8rem;background:rgba(205,133,63,.15);color:var(--accent-gold);border-radius:50px;font-size:.75rem;font-weight:600;margin-bottom:.8rem}
         .cardapio-card h3{font-size:1.3rem;margin-bottom:.5rem}.cardapio-card p{color:var(--text-muted);font-size:.9rem;line-height:1.5}
         .cardapio-price{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--accent-gold);margin-top:.8rem;font-weight:700}
+        .menu-modal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.78);backdrop-filter:blur(10px)}.menu-modal.active{display:flex}.menu-dialog{width:min(980px,100%);max-height:92vh;overflow:auto;background:linear-gradient(180deg,#151515,#090909);border:1px solid rgba(205,133,63,.35);border-radius:24px;box-shadow:0 30px 90px rgba(0,0,0,.65);position:relative}.menu-close{position:sticky;top:1rem;float:right;margin:1rem 1rem 0 0;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.55);color:#fff;font-size:1.8rem;line-height:1;cursor:pointer;z-index:2}.menu-content{padding:2.4rem}.menu-header{text-align:center;margin-bottom:2rem}.menu-kicker{display:inline-block;color:var(--accent-gold);border:1px solid rgba(205,133,63,.45);border-radius:999px;padding:.35rem 1rem;font-size:.75rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem}.menu-header h2{font-size:clamp(2rem,4vw,3.2rem);margin-bottom:.5rem}.menu-header p{color:var(--text-light);line-height:1.7}.menu-section-title{font-family:'Playfair Display',serif;color:var(--accent-gold);font-size:1.5rem;margin:2rem 0 1rem}.menu-entries{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem}.menu-entry,.menu-item{background:rgba(255,255,255,.035);border:1px solid var(--border-subtle);border-radius:16px;padding:1.2rem}.menu-entry h4,.menu-item h3{font-family:'Inter',sans-serif;color:#fff;margin-bottom:.45rem}.menu-entry p,.menu-item p{color:var(--text-light);font-size:.92rem;line-height:1.6}.menu-items{display:grid;gap:1rem}.menu-item{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start}.menu-item-price{font-family:'Playfair Display',serif;color:var(--accent-gold);font-size:1.45rem;font-weight:900;white-space:nowrap}.menu-note{margin-top:1.4rem;color:var(--text-muted);font-size:.9rem;text-align:center}.menu-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}.body-modal-open{overflow:hidden}@media(max-width:600px){.menu-content{padding:1.4rem}.menu-item{grid-template-columns:1fr}.menu-item-price{font-size:1.3rem}.menu-close{top:.5rem;margin:.6rem .6rem 0 0}}
         .media-showcase{background:linear-gradient(180deg,var(--bg-dark),var(--bg-section));position:relative;overflow:hidden}.media-showcase::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(205,133,63,.10),transparent 35%),radial-gradient(circle at 80% 70%,rgba(192,57,43,.10),transparent 35%);pointer-events:none}.media-showcase .container{position:relative;z-index:1}.featured-video{background:var(--bg-card);border:1px solid rgba(205,133,63,.28);border-radius:20px;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.45);margin-bottom:2rem}.featured-video video{display:block;width:100%;aspect-ratio:16/9;background:#000;object-fit:cover}.featured-video-caption{padding:1.4rem 1.6rem;color:var(--text-light);line-height:1.7}.featured-video-caption strong{color:var(--accent-gold);font-family:'Playfair Display',serif;font-size:1.25rem}.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem}.gallery-card{position:relative;min-height:260px;border-radius:18px;overflow:hidden;background:var(--bg-card);border:1px solid var(--border-subtle);box-shadow:0 18px 45px rgba(0,0,0,.35)}.gallery-card img{width:100%;height:100%;min-height:260px;object-fit:cover;display:block;transition:transform .45s ease,filter .45s ease}.gallery-card:hover img{transform:scale(1.06);filter:saturate(1.08) contrast(1.05)}.gallery-card span{position:absolute;left:0;right:0;bottom:0;padding:2.5rem 1rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.88));font-weight:700;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.7)}
         .promos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
         .promo-card{background:linear-gradient(135deg,var(--bg-card),#1a1000);border:1px solid rgba(205,133,63,.3);border-radius:18px;text-align:left;position:relative;overflow:hidden;box-shadow:0 18px 45px rgba(0,0,0,.35)}
@@ -368,6 +369,41 @@
     <div class="footer-bottom"><p>&copy; 2026 Maça da Paleta - Steakhouse & Empório. Todos os direitos reservados. CNPJ: 61.256.890/0001-91</p></div>
 </footer>
 
+<!-- CARDAPIO MODAL -->
+<div class="menu-modal" id="cardapioModal" role="dialog" aria-modal="true" aria-labelledby="cardapioModalTitle" aria-hidden="true">
+    <div class="menu-dialog">
+        <button class="menu-close" type="button" aria-label="Fechar cardápio" data-close-menu>&times;</button>
+        <div class="menu-content">
+            <div class="menu-header">
+                <span class="menu-kicker">Escolha 1 entrada + 1 prato principal</span>
+                <h2 id="cardapioModalTitle">Almoço Executivo</h2>
+                <p>Opções servidas no almoço, com pratos principais acompanhando arroz branco e feijão.</p>
+            </div>
+
+            <h3 class="menu-section-title">Entradas</h3>
+            <div class="menu-entries">
+                <div class="menu-entry"><h4>Mix de alho com crocância de legumes grelhados</h4><p>Entrada leve e aromática para abrir o apetite.</p></div>
+                <div class="menu-entry"><h4>Salada de folhas frescas</h4><p>Mix de folhas com tempero da casa.</p></div>
+                <div class="menu-entry"><h4>Linguiça suína com farofa da casa</h4><p>Linguiça grelhada servida com farofa especial.</p></div>
+            </div>
+
+            <h3 class="menu-section-title">Pratos principais</h3>
+            <div class="menu-items">
+                <div class="menu-item"><div><h3>1. Chorizo à Cavalo</h3><p>Chorizo grelhado ao ponto, servido com ovo frito, arroz branco salteado no alho e feijão.</p></div><div class="menu-item-price">R$ 59,90</div></div>
+                <div class="menu-item"><div><h3>2. Ancho com Crosta de Queijos</h3><p>Ancho grelhado com crosta cremosa de gorgonzola, mussarela, parmesão e farofa crocante. Acompanha batata frita.</p></div><div class="menu-item-price">R$ 64,90</div></div>
+                <div class="menu-item"><div><h3>3. Sobrecoxa Grelhada ao Bechamel</h3><p>Sobrecoxa desossada grelhada com legumes grelhados e molho bechamel gratinado, finalizada com tomate cereja.</p></div><div class="menu-item-price">R$ 45,90</div></div>
+                <div class="menu-item"><div><h3>4. Maçã da Paleta</h3><p>Maçã da paleta grelhada ao ponto com purê de mandioquinha, vinagrete de feijão fradinho com queijo coalho e molho demi-glace da casa.</p></div><div class="menu-item-price">R$ 54,90</div></div>
+                <div class="menu-item"><div><h3>5. Executivo de Salmão</h3><p>Filé de salmão grelhado, acompanhado de creme de espinafre e cebolas grelhadas no charbroiler.</p></div><div class="menu-item-price">R$ 69,90</div></div>
+            </div>
+            <p class="menu-note">*Cardápio sujeito à disponibilidade do dia. Consulte a equipe para confirmar entradas e acompanhamentos.</p>
+            <div class="menu-actions">
+                <a href="https://wa.me/5519981458256?text=Olá! Gostaria de saber mais sobre o almoço executivo do Maça da Paleta" class="btn-primary">📲 Perguntar pelo WhatsApp</a>
+                <button class="btn-secondary" type="button" data-close-menu>Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- WHATSAPP FLOAT -->
 <a href="https://wa.me/5519981458256?text=Olá! Gostaria de saber mais sobre o Maça da Paleta" class="whatsapp-float" aria-label="WhatsApp">
     <div class="whatsapp-pulse"></div>
@@ -379,7 +415,16 @@
     window.addEventListener('scroll',()=>{navbar.classList.toggle('scrolled',window.scrollY>50)});
     const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('visible')})},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
     document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
-    document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t){t.scrollIntoView({behavior:'smooth',block:'start'});document.getElementById('navLinks').classList.remove('active')}})});
+
+    const cardapioModal=document.getElementById('cardapioModal');
+    const openCardapio=()=>{cardapioModal.classList.add('active');cardapioModal.setAttribute('aria-hidden','false');document.body.classList.add('body-modal-open');};
+    const closeCardapio=()=>{cardapioModal.classList.remove('active');cardapioModal.setAttribute('aria-hidden','true');document.body.classList.remove('body-modal-open');};
+    document.querySelectorAll('a[href="#cardapio"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();openCardapio();document.getElementById('navLinks').classList.remove('active')})});
+    document.querySelectorAll('[data-close-menu]').forEach(btn=>btn.addEventListener('click',closeCardapio));
+    cardapioModal.addEventListener('click',e=>{if(e.target===cardapioModal)closeCardapio()});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&cardapioModal.classList.contains('active'))closeCardapio()});
+
+    document.querySelectorAll('a[href^="#"]:not([href="#cardapio"])').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t){t.scrollIntoView({behavior:'smooth',block:'start'});document.getElementById('navLinks').classList.remove('active')}})});
 </script>
 
 <!-- Instagram Embed Script -->
